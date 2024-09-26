@@ -19,8 +19,7 @@ private func closeScheduledJob(_ req: UnsafeMutablePointer<uv_handle_t>?) {
 
 final class UVScheduledManager {
     private let jobs: UVJobs
-    private var timers: [UVTimer] = []
-    private let t = UVIdArray<UVTimer>()
+    private let timers = UVIdArray<UVTimer>()
 
     init(_ jobs: UVJobs) {
         self.jobs = jobs
@@ -28,10 +27,10 @@ final class UVScheduledManager {
 
     /// Schedule a task to run after a 'timeout' in milliseconds
     func submit(_ task: @escaping UVTask, in timeout: UInt64) {
-        t.append { id in
+        timers.append { id in
             UVTimer(manager: self, timeout: timeout, id: id, task: task)
         }
-        t.update(with: t.currentId) { timer in
+        timers.update(with: timers.currentId) { timer in
             UVTimer.start(&timer, on: jobs.loop)
         }
     }
@@ -47,7 +46,7 @@ final class UVScheduledManager {
     }
 
     func removeTimer(with id: UInt) {
-        t.remove(with: id)
+        timers.remove(with: id)
     }
 
     func timeNow(callback: @escaping UVCheckTimeCallback) {
