@@ -36,7 +36,11 @@ public final class UVTcpBuffer: @unchecked Sendable {
 
     func allocate(to buffer: UnsafeMutablePointer<uv_buf_t>) {
         buffer.pointee.base = data
-        buffer.pointee.len = Int(size)
+        #if os(Windows)
+            buffer.pointee.len = size
+        #else
+            buffer.pointee.len = Int(size)
+        #endif
     }
 
     func getBuffer() -> UnsafeMutablePointer<uv_buf_t> {
