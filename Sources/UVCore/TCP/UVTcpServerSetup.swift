@@ -17,7 +17,7 @@ public final class UVTcpServerSetup {
         self.port = port
     }
 
-    var config: UVTcpServerConfig? {
+    public var config: UVTcpServerConfig? {
         .init(from: self)
     }
 }

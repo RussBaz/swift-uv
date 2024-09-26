@@ -53,7 +53,7 @@ final class UVTcpConnection {
     var connection: uv_tcp_t
     private let server: UVTcpServer
 
-    private var inBuffers: [UVTcpBuffer] = []
+    private let inBuffers = UVIdArray<UVTcpBuffer>()
     private let outBuffers = UVIdArray<UVTcpResponse>()
 
     private var currentResponseId: UInt = 0
@@ -82,11 +82,9 @@ final class UVTcpConnection {
     }
 
     func allocateBuffer(size: Int) -> UVTcpBuffer {
-        let buffer = UVTcpBuffer(size: size)
+        inBuffers.append(UVTcpBuffer(size: size))
 
-        inBuffers.append(buffer)
-
-        return buffer
+        return inBuffers.last()!
     }
 
     func startReading(using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
@@ -101,13 +99,9 @@ final class UVTcpConnection {
     }
 
     func read() {
-        guard !inBuffers.isEmpty else {
-            print("weird buffer stuff")
-            close()
+        guard let buffer = inBuffers.removeFirst() else {
             return
         }
-
-        let buffer = inBuffers.removeFirst()
 
         if let callback {
             callback(buffer)

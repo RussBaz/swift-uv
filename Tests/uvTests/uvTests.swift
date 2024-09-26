@@ -1,4 +1,4 @@
-@testable import UV
+@testable import UVCore
 import XCTest
 
 actor SampleTestActor {

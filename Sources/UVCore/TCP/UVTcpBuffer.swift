@@ -3,7 +3,7 @@ import Foundation
 import Clibuv
 
 public final class UVTcpBuffer: @unchecked Sendable {
-    private let size: Int
+    private let size: UInt32
     private(set) var data: UnsafeMutablePointer<CChar>
     private var _data: ContiguousArray<CChar>?
     private var buffer: uv_buf_t?
@@ -11,7 +11,7 @@ public final class UVTcpBuffer: @unchecked Sendable {
 
     init(size: Int) {
         guard size > 0 else { fatalError("Zero or less buffer?") }
-        self.size = size
+        self.size = UInt32(size)
         data = .allocate(capacity: size)
         data.initialize(to: 0)
     }
@@ -26,7 +26,7 @@ public final class UVTcpBuffer: @unchecked Sendable {
         _data = string.utf8CString
 
         let (pointer, count) = _data!.withUnsafeBufferPointer { pointer in
-            (pointer.baseAddress, pointer.count)
+            (pointer.baseAddress, UInt32(pointer.count))
         }
         guard let pointer else { return nil }
         mustDeallocate = false
@@ -36,12 +36,16 @@ public final class UVTcpBuffer: @unchecked Sendable {
 
     func allocate(to buffer: UnsafeMutablePointer<uv_buf_t>) {
         buffer.pointee.base = data
-        buffer.pointee.len = size
+        buffer.pointee.len = Int(size)
     }
 
     func getBuffer() -> UnsafeMutablePointer<uv_buf_t> {
         if buffer == nil {
-            buffer = uv_buf_t(base: data, len: size)
+            #if os(Windows)
+                buffer = uv_buf_t(len: size, base: data)
+            #else
+                buffer = uv_buf_t(base: data, len: Int(size))
+            #endif
         }
 
         return withUnsafeMutablePointer(to: &buffer!) { $0 }

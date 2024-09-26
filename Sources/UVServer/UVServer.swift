@@ -1,4 +1,4 @@
-import Clibuv
+import UVCore
 
 public final actor UVServer {
     private let executor: UVExecutor

@@ -1,15 +1,18 @@
-import UV
+import UVCore
+import UVServer
 
 let server = UVServer()
 
 let message = """
 HTTP/1.1 200 OK
-Content-Length: 12
-Content-Type: text/plain; charset=utf-8
+Content-Length: 23
+Content-Type: text/html; charset=utf-8
 
-Hello World!
+<p> Hello World! </p>
 
 """
+
+let buffer = UVTcpBuffer(string: message)
 
 let status = await server.start { status in
     switch status {
@@ -18,7 +21,7 @@ let status = await server.start { status in
             for await req in success.requests {
                 let text = req.asString
                 print("Recieved:\n\(text)")
-                guard let buffer = UVTcpBuffer(string: message) else { break }
+                guard let buffer else { break }
                 await success.write(buffer)
             }
             print("connection closed")

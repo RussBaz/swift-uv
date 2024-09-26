@@ -28,8 +28,12 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "UV",
-            targets: ["UV"]
+            name: "UVCore",
+            targets: ["UVCore"]
+        ),
+        .library(
+            name: "UVServer",
+            targets: ["UVServer"]
         ),
     ],
     targets: [
@@ -37,28 +41,35 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         libuvTarget,
         .target(
-            name: "UV",
+            name: "UVCore",
             dependencies: [
                 "Clibuv",
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "UVServer",
+            dependencies: [
+                "UVCore",
             ],
             swiftSettings: swiftSettings
         ),
         .executableTarget(
             name: "HelloServer",
             dependencies: [
-                "UV",
+                "UVCore",
+                "UVServer",
             ]
         ),
         .testTarget(
             name: "uvTests",
-            dependencies: ["UV"],
+            dependencies: ["UVCore"],
             swiftSettings: swiftSettings
         ),
     ]
 )
 
 let swiftSettings: [SwiftSetting] = [
-    // Flags to enable Swift 6 compatibility
     // Flags to warn about the type checking getting too slow
     .unsafeFlags(
         [

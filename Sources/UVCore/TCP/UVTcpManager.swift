@@ -58,6 +58,12 @@ final class UVTcpManager {
 
     func stop() {}
 
+    func closeConnection(_ connectionId: UInt, on serverId: UInt) {
+        guard let server = getServer(with: serverId) else { return }
+        guard let connection = server.getConnection(with: connectionId) else { return }
+        connection.close()
+    }
+
     func close(_ id: UInt) {
         guard let server = getServer(with: id) else { return }
         server.close()

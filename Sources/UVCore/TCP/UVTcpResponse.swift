@@ -41,7 +41,6 @@ final class UVTcpResponse {
     }
 
     func finalise() {
-        print("After response:\n\(buffer.asString)")
         callback()
         connection.removeReponseBuffer(with: id)
     }

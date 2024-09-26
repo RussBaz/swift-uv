@@ -56,6 +56,24 @@ final class UVIdArray<T: AnyObject> {
         items.removeAll()
     }
 
+    @discardableResult
+    func removeFirst() -> T? {
+        items.removeFirst().item
+    }
+
+    func first() -> T? {
+        items.first?.item
+    }
+
+    @discardableResult
+    func removeLast() -> T? {
+        items.popLast()?.item
+    }
+
+    func last() -> T? {
+        items.last?.item
+    }
+
     func map<U>(using: (T) -> U) -> [U] {
         items.map { using($0.item) }
     }

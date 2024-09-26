@@ -4,11 +4,7 @@ import Foundation
 private func handleAsyncJobs(_ req: UnsafeMutablePointer<uv_async_t>?) {
     guard let req else { return }
 
-    print("preparing a task")
-
     let baton = req.pointee.data.load(as: UVJobs.self)
-
-    print("calling a task")
 
     baton.handleJobs()
 }
@@ -18,8 +14,6 @@ private func closeJobHandle(_ req: UnsafeMutablePointer<uv_handle_t>?) {
         print("having issues closing the jobs handler")
         return
     }
-
-    print("closing the jobs handler")
 }
 
 private func closeAllOpenHandlers(_ req: UnsafeMutablePointer<uv_handle_t>?, _: UnsafeMutableRawPointer?) {
@@ -50,7 +44,6 @@ final class UVJobs {
     }
 
     func stop() {
-        print("stopping the jobs handler")
         uv_close(castToBaseHandler(&req), closeJobHandle(_:))
         if let tcp {
             tcp.stop()
@@ -60,7 +53,6 @@ final class UVJobs {
     }
 
     func add(command: UVTaskType) {
-        print("command added: \(command)")
         tasks.enqueue(command)
         uv_async_send(&req)
     }
@@ -81,20 +73,16 @@ final class UVJobs {
         while let task = tasks.dequeue() {
             switch task {
             case let .blocking(uVTask):
-                print("running a blocking task")
                 uVTask()
             case .stop:
-                print("running the stop loop task")
                 if let tcp {
                     tcp.stop()
                 }
                 stop()
             case let .timeNow(callback):
-                print("running time now task")
                 let time = uv_now(loop)
                 callback(time)
             case let .scheduleBlockingOnceAfter(task, after):
-                print("scheduling a task to run after a delay")
                 guard let timers else {
                     print("timers delegate not set up")
                     continue
@@ -102,7 +90,6 @@ final class UVJobs {
 
                 timers.submit(task, in: after)
             case let .scheduleBlockingOnceAt(task, at):
-                print("scheduling a task to run a given point in time")
                 guard let timers else {
                     print("timers delegate not set up")
                     continue
@@ -116,7 +103,7 @@ final class UVJobs {
                 tcp.startReading(connection, on: server, using: callback, disconnect: disconnect)
             case let .closeTcpConnection(server, connection):
                 guard let tcp else { continue }
-//                tcp.close(server: server, connection: connection)
+                tcp.closeConnection(connection, on: server)
             case let .writeTcp(server, connection, buffer, callback):
                 guard let tcp else { continue }
                 tcp.write(buffer, to: connection, on: server, using: callback)
