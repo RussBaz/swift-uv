@@ -1,5 +1,5 @@
+import Testing
 @testable import UVCore
-import XCTest
 
 actor SampleTestActor {
     let executor: UVExecutor
@@ -32,8 +32,8 @@ actor SampleTestActor {
     }
 }
 
-final class uvTests: XCTestCase {
-    func testExecutor() async throws {
+struct uvTests {
+    @Test func executorRuns() async throws {
         let config = UVTcpServerSetup()
         config.onStart = { status in
             switch status {
@@ -69,7 +69,6 @@ final class uvTests: XCTestCase {
 
         try await Task.sleep(until: .now.advanced(by: .seconds(20)))
 
-        XCTAssertEqual(v, 2)
-        XCTAssertTrue(true)
+        #expect(v == 2)
     }
 }
