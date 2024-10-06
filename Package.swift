@@ -36,6 +36,10 @@ let package = Package(
             targets: ["UVServer"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/RussBaz/mini-alloc", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -44,6 +48,8 @@ let package = Package(
             name: "UVCore",
             dependencies: [
                 "Clibuv",
+                .product(name: "MA", package: "mini-alloc"),
+                .product(name: "Collections", package: "swift-collections"),
             ],
             swiftSettings: swiftSettings
         ),

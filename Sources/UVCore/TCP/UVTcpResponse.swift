@@ -16,14 +16,14 @@ private func onWrite(req: UnsafeMutablePointer<uv_write_t>?, status: Int32) {
 }
 
 final class UVTcpResponse {
-    private let id: UInt
+    private let id: Int
     private let callback: () -> Void
     private let connection: UVTcpConnection
     private var request = uv_write_t()
     private let buffer: UVTcpBuffer
     private var running = true
 
-    init(id: UInt, connection: UVTcpConnection, buffer: UVTcpBuffer, callback: @escaping () -> Void) {
+    init(id: Int, connection: UVTcpConnection, buffer: UVTcpBuffer, callback: @escaping () -> Void) {
         self.connection = connection
         self.buffer = buffer
         self.id = id

@@ -1,9 +1,9 @@
 public final class UVTcpConnectionController: @unchecked Sendable {
-    let connectionId: UInt
-    let serverId: UInt
+    let connectionId: Int
+    let serverId: Int
     private let jobs: UVJobs
 
-    init(jobs: UVJobs, server serverId: UInt, connection connectionId: UInt) {
+    init(jobs: UVJobs, server serverId: Int, connection connectionId: Int) {
         self.connectionId = connectionId
         self.serverId = serverId
         self.jobs = jobs

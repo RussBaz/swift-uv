@@ -8,7 +8,7 @@ public enum UVIPAddress {
 public final class UVTcpServerSetup {
     public let address: UVIPAddress
     public let port: Int32
-    public var onStart: (@Sendable (Result<UInt, UVError>) -> Void)?
+    public var onStart: (@Sendable (Result<Int, UVError>) -> Void)?
     public var onStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
     public var onConnection: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
 
@@ -26,7 +26,7 @@ public struct UVTcpServerConfig {
     public let addr: sockaddr
     public let address: UVIPAddress
     public let port: Int32
-    public let onStart: (@Sendable (Result<UInt, UVError>) -> Void)?
+    public let onStart: (@Sendable (Result<Int, UVError>) -> Void)?
     public let onStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
     public let onConnection: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
 }

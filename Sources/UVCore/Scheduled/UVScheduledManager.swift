@@ -1,5 +1,6 @@
 import Clibuv
 import Foundation
+import MA
 
 private func handleScheduledJob(_ req: UnsafeMutablePointer<uv_timer_t>?) {
     guard let req else { return }
@@ -19,7 +20,7 @@ private func closeScheduledJob(_ req: UnsafeMutablePointer<uv_handle_t>?) {
 
 final class UVScheduledManager {
     private let jobs: UVJobs
-    private let timers = UVIdArray<UVTimer>()
+    private let timers = MAContainer<UVTimer>()
 
     init(_ jobs: UVJobs) {
         self.jobs = jobs
@@ -27,10 +28,12 @@ final class UVScheduledManager {
 
     /// Schedule a task to run after a 'timeout' in milliseconds
     func submit(_ task: @escaping UVTask, in timeout: UInt64) {
-        timers.append { id in
+        let id = timers.retain { id in
             UVTimer(manager: self, timeout: timeout, id: id, task: task)
         }
-        timers.update(with: timers.currentId) { timer in
+        guard let id else { return }
+
+        timers.update(with: id) { timer in
             UVTimer.start(&timer, on: jobs.loop)
         }
     }
@@ -45,8 +48,8 @@ final class UVScheduledManager {
         }
     }
 
-    func removeTimer(with id: UInt) {
-        timers.remove(with: id)
+    func removeTimer(with id: Int) {
+        timers.release(id)
     }
 
     func timeNow(callback: @escaping UVCheckTimeCallback) {
@@ -56,13 +59,13 @@ final class UVScheduledManager {
 }
 
 private final class UVTimer {
-    private let id: UInt
+    private let id: Int
     private var value: uv_timer_t
     private var manager: UVScheduledManager
     private let task: UVTask
     private let timeout: UInt64
 
-    init(manager: UVScheduledManager, timeout: UInt64, id: UInt, task: @escaping UVTask) {
+    init(manager: UVScheduledManager, timeout: UInt64, id: Int, task: @escaping UVTask) {
         value = uv_timer_t()
         self.manager = manager
         self.task = task

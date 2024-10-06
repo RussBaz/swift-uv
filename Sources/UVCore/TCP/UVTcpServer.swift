@@ -1,4 +1,5 @@
 import Clibuv
+import MA
 
 private func onTcpServerClose(_ handle: UnsafeMutablePointer<uv_handle_t>?) {
     guard handle != nil else {
@@ -33,7 +34,7 @@ final class UVTcpServer {
         var value: UVTcpConnection
     }
 
-    let id: UInt
+    let id: Int
     let manager: UVTcpManager
     var server: uv_tcp_t
 
@@ -41,7 +42,7 @@ final class UVTcpServer {
     private let address: UVIPAddress
     private let port: UInt
 
-    private let connections = UVIdArray<UVTcpConnection>()
+    private let connections = MAContainer<UVTcpConnection>()
 
     private var opened = true
 
@@ -49,7 +50,7 @@ final class UVTcpServer {
     let onStop: ((UInt, UVTcpServerStatus) -> Void)?
     var onRead: ((UVTcpBuffer) -> Void)?
 
-    init(manager: UVTcpManager, config: UVTcpServerConfig, id: UInt) {
+    init(manager: UVTcpManager, config: UVTcpServerConfig, id: Int) {
         self.id = id
         address = config.address
         port = UInt(config.port)
@@ -94,9 +95,9 @@ final class UVTcpServer {
         }
 
         let connection = UVTcpConnection(server: self)
-        let pointer = connections.append(connection)
+        let id = connections.retain(connection)!
+        let pointer = connections.pointer(to: id)!
         let r = connection.accept(pointer)
-        let id = connections.currentId
 
         switch r {
         case .success:
@@ -104,19 +105,19 @@ final class UVTcpServer {
                 onConnection(.success(UVTcpConnectionController(jobs: manager.jobs, server: self.id, connection: id)))
             }
         case let .failure(failure):
-            connections.remove(with: id)
+            connections.release(id)
             if let onConnection {
                 onConnection(.failure(failure))
             }
         }
     }
 
-    func startReading(_ connectionId: UInt, using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
+    func startReading(_ connectionId: Int, using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
         guard let connection = getConnection(with: connectionId) else { return }
         connection.startReading(using: callback, disconnect: disconnect)
     }
 
-    func write(_ buffer: UVTcpBuffer, to connectionId: UInt, using callback: @escaping (() -> Void)) {
+    func write(_ buffer: UVTcpBuffer, to connectionId: Int, using callback: @escaping (() -> Void)) {
         guard let connection = getConnection(with: connectionId) else { return }
         connection.write(buffer: buffer, using: callback)
     }
@@ -127,7 +128,7 @@ final class UVTcpServer {
         opened = false
     }
 
-    func getConnection(with id: UInt) -> UVTcpConnection? {
+    func getConnection(with id: Int) -> UVTcpConnection? {
         connections.find(by: id)
     }
 

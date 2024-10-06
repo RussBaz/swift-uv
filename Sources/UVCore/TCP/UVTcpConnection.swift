@@ -1,5 +1,7 @@
 import Clibuv
+import Collections
 import Foundation
+import MA
 
 private func onBufferAllocate(handle: UnsafeMutablePointer<uv_handle_t>?, size: Int, buffer: UnsafeMutablePointer<uv_buf_t>?) {
     guard handle != nil, buffer != nil else {
@@ -53,8 +55,9 @@ final class UVTcpConnection {
     var connection: uv_tcp_t
     private let server: UVTcpServer
 
-    private let inBuffers = UVIdArray<UVTcpBuffer>()
-    private let outBuffers = UVIdArray<UVTcpResponse>()
+    private var allocatedBufferIds = Deque<Int>()
+    private let inBuffers = MAContainer<UVTcpBuffer>()
+    private let outBuffers = MAContainer<UVTcpResponse>()
 
     private var currentResponseId: UInt = 0
 
@@ -82,9 +85,10 @@ final class UVTcpConnection {
     }
 
     func allocateBuffer(size: Int) -> UVTcpBuffer {
-        inBuffers.append(UVTcpBuffer(size: size))
+        let id = inBuffers.retain(UVTcpBuffer(size: size))!
+        allocatedBufferIds.append(id)
 
-        return inBuffers.last()!
+        return inBuffers.find(by: id)!
     }
 
     func startReading(using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
@@ -99,9 +103,8 @@ final class UVTcpConnection {
     }
 
     func read() {
-        guard let buffer = inBuffers.removeFirst() else {
-            return
-        }
+        guard let id = allocatedBufferIds.popFirst() else { return }
+        guard let buffer = inBuffers.find(by: id) else { return }
 
         if let callback {
             callback(buffer)
@@ -115,10 +118,9 @@ final class UVTcpConnection {
     }
 
     func write(buffer container: UVTcpBuffer, using callback: @escaping (() -> Void)) {
-        outBuffers.append {
+        let id = outBuffers.retain {
             UVTcpResponse(id: $0, connection: self, buffer: container, callback: callback)
-        }
-        let id = outBuffers.currentId
+        }!
         outBuffers.update(with: id) { response in
             response.write(&response)
         }
@@ -128,7 +130,6 @@ final class UVTcpConnection {
         if let disconnectCallback {
             disconnectCallback()
         }
-        inBuffers.removeFirst()
     }
 
     func reset() {}
@@ -139,8 +140,8 @@ final class UVTcpConnection {
         uv_close(castToBaseHandler(&connection), nil)
     }
 
-    func removeReponseBuffer(with id: UInt) {
-        outBuffers.remove(with: id)
+    func removeReponseBuffer(with id: Int) {
+        outBuffers.release(id)
     }
 
     deinit {

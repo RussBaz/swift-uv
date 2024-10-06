@@ -13,7 +13,7 @@ public final actor UVServer {
         config = UVTcpServerSetup(address, port: Int32(port))
     }
 
-    public func start(using connectionCallback: (@escaping @Sendable (Result<UVTcpConn, UVError>) -> Void) = { _ in }) async -> Result<UInt, UVError> {
+    public func start(using connectionCallback: (@escaping @Sendable (Result<UVTcpConn, UVError>) -> Void) = { _ in }) async -> Result<Int, UVError> {
         config.onConnection = { status in
             print("new message")
             switch status {

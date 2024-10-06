@@ -1,0 +1,24 @@
+{
+  "originHash" : "1648fc8f7bba0d56e4962950d53ea64e680315bd79c37bfa26c9f6011678c193",
+  "pins" : [
+    {
+      "identity" : "mini-alloc",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RussBaz/mini-alloc",
+      "state" : {
+        "revision" : "4cc2a52d36b7e08ca3295c1d111dc1c2c5e72d18",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
+        "version" : "1.1.4"
+      }
+    }
+  ],
+  "version" : 3
+}
