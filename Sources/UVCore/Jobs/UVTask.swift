@@ -9,7 +9,10 @@ enum UVTaskType {
     case scheduleBlockingOnceAfter(task: UVTask, timeout: UInt64)
     case scheduleBlockingOnceAt(task: UVTask, timeout: UInt64)
     case listenTcp(with: UVTcpServerConfig)
-    case startTcpReading(server: Int, connection: Int, callback: @Sendable (UVTcpBuffer) -> Void, disconnect: @Sendable () -> Void)
+    case startTcpReading(
+        server: Int, connection: Int, callback: @Sendable (UVTcpBuffer) -> Void,
+        disconnect: @Sendable () -> Void
+    )
     case closeTcpConnection(connection: Int)
     case writeTcp(server: Int, connection: Int, buffer: UVTcpBuffer, callback: @Sendable () -> Void)
     case stopListeningTcp(server: Int)

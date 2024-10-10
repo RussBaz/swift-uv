@@ -67,7 +67,7 @@ struct uvTests {
         let v = await a.getCounter()
         await a.startListening(config.config)
 
-        try await Task.sleep(until: .now.advanced(by: .seconds(20)))
+        try await Task.sleep(until: .now.advanced(by: .seconds(10)))
 
         #expect(v == 2)
     }

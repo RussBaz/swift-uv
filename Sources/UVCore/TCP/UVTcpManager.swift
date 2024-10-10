@@ -64,7 +64,9 @@ public final class UVTcpManager {
         switch r {
         case .success:
             if let onConnect = server.onConnect {
-                onConnect(.success(UVTcpConnectionController(jobs: jobs, server: server.id, connection: id)))
+                onConnect(
+                    .success(
+                        UVTcpConnectionController(jobs: jobs, server: server.id, connection: id)))
             }
         case let .failure(failure):
             connections.release(id)
@@ -74,14 +76,20 @@ public final class UVTcpManager {
         }
     }
 
-    func startReading(_ connectionId: Int, on serverId: Int, using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
+    func startReading(
+        _ connectionId: Int, on serverId: Int, using callback: ((UVTcpBuffer) -> Void)?,
+        disconnect: (() -> Void)?
+    ) {
         guard let server = getServer(with: serverId) else { return }
         server.startReading(connectionId, using: callback, disconnect: disconnect)
     }
 
     func stopReading(_: Int, on _: Int) {}
 
-    func write(_ buffer: UVTcpBuffer, to connectionId: Int, on serverId: Int, using callback: @escaping (() -> Void)) {
+    func write(
+        _ buffer: UVTcpBuffer, to connectionId: Int, on serverId: Int,
+        using callback: @escaping (() -> Void)
+    ) {
         guard let server = getServer(with: serverId) else { return }
         server.write(buffer, to: connectionId, using: callback)
     }

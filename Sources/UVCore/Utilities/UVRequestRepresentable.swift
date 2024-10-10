@@ -3,7 +3,9 @@ import Clibuv
 public protocol UVRequestRepresentable {}
 
 @inlinable
-func castToBaseRequest(_ handler: UnsafeMutablePointer<some UVRequestRepresentable>) -> UnsafeMutablePointer<uv_req_t> {
+func castToBaseRequest(_ handler: UnsafeMutablePointer<some UVRequestRepresentable>)
+    -> UnsafeMutablePointer<uv_req_t>
+{
     func castPointer(_ p: UnsafeMutableRawPointer) -> UnsafeMutablePointer<uv_req_t> {
         p.assumingMemoryBound(to: uv_req_t.self)
     }

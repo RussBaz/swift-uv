@@ -38,10 +38,14 @@ extension UVTcpServerConfig {
         var addr = sockaddr()
         switch setup.address {
         case let .ipv4(address):
-            guard uv_ip4_addr(address, setup.port, castFromBaseAddress(&addr)) == 0 else { return nil }
+            guard uv_ip4_addr(address, setup.port, castFromBaseAddress(&addr)) == 0 else {
+                return nil
+            }
             self.addr = addr
         case let .ipv6(address):
-            guard uv_ip6_addr(address, setup.port, castFromBaseAddress(&addr)) == 0 else { return nil }
+            guard uv_ip6_addr(address, setup.port, castFromBaseAddress(&addr)) == 0 else {
+                return nil
+            }
             self.addr = addr
         }
 

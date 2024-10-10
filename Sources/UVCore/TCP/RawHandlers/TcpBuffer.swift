@@ -1,6 +1,8 @@
 import Clibuv
 
-func onTcpBufferAllocate(handle _: UnsafeMutablePointer<uv_handle_t>!, size: Int, buffer: UnsafeMutablePointer<uv_buf_t>!) {
+func onTcpBufferAllocate(
+    handle _: UnsafeMutablePointer<uv_handle_t>!, size: Int, buffer: UnsafeMutablePointer<uv_buf_t>!
+) {
     guard size > 0 else {
         buffer!.pointee.base = nil
         buffer!.pointee.len = 0
@@ -12,7 +14,9 @@ func onTcpBufferAllocate(handle _: UnsafeMutablePointer<uv_handle_t>!, size: Int
     buffer!.pointee.len = size
 }
 
-func onTcpRead(connection: UnsafeMutablePointer<uv_stream_t>!, nread: Int, buffer: UnsafePointer<uv_buf_t>!) {
+func onTcpRead(
+    connection: UnsafeMutablePointer<uv_stream_t>!, nread: Int, buffer: UnsafePointer<uv_buf_t>!
+) {
     let pointer = ConnectionRef.assume(from: connection)
     let ref = pointer.pointee
     let connection = ref.manager.pointee.getConnection(with: ref.connectionId)

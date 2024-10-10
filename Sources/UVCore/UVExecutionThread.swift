@@ -36,15 +36,16 @@ public final class UVExecutionThread: Thread, @unchecked Sendable {
             let name = uv_err_name(result).map { String(cString: $0) }
             let description = uv_strerror(result).map { String(cString: $0) }
 
-            let message = if let name {
-                if let description {
-                    "[\(name): \(description)]"
+            let message =
+                if let name {
+                    if let description {
+                        "[\(name): \(description)]"
+                    } else {
+                        "[\(name)]"
+                    }
                 } else {
-                    "[\(name)]"
+                    "[unknown code]"
                 }
-            } else {
-                "[unknown code]"
-            }
 
             print("Error: \(result) \(message)")
 

@@ -2,4 +2,4 @@
 
 libuv runner + custom actor executor + sample server. A work in progress.
 
-The wrapper (for now) requires a working copy of libuv already installed. Please use provided `pwsh` scripts for a windows build.
+The project includes a copy of 'libuv' version 1.49.0. (https://github.com/libuv/libuv)

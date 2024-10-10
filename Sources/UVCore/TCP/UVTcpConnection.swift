@@ -39,7 +39,9 @@ final class UVTcpConnection {
         self.server = server
         serverId = server.id
         manager = server.managerPointer
-        connection.data = ConnectionRef(manager: server.managerPointer, serverId: serverId, connectionId: id).rawPointer
+        connection.data =
+            ConnectionRef(manager: server.managerPointer, serverId: serverId, connectionId: id)
+                .rawPointer
         uv_tcp_init(server.manager.jobs.loop, &connection)
     }
 
@@ -56,7 +58,10 @@ final class UVTcpConnection {
     func startReading(using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
         self.callback = callback
         disconnectCallback = disconnect
-        let r = uv_read_start(castToBaseStream(&connection), onTcpBufferAllocate(handle:size:buffer:), onTcpRead(connection:nread:buffer:))
+        let r = uv_read_start(
+            castToBaseStream(&connection), onTcpBufferAllocate(handle:size:buffer:),
+            onTcpRead(connection:nread:buffer:)
+        )
 
         guard r == 0 else {
             close()

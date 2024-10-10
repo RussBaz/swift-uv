@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-uv}",
+      "name": "Debug HelloServer",
+      "program": "${workspaceFolder:swift-uv}/.build/debug/HelloServer",
+      "preLaunchTask": "swift: Build Debug HelloServer"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-uv}",
+      "name": "Release HelloServer",
+      "program": "${workspaceFolder:swift-uv}/.build/release/HelloServer",
+      "preLaunchTask": "swift: Build Release HelloServer"
+    }
+  ]
+}

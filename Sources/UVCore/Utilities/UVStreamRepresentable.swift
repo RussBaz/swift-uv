@@ -3,7 +3,9 @@ import Clibuv
 public protocol UVStreamRepresentable {}
 
 @inlinable
-func castFromBaseStream<T: UVStreamRepresentable>(_ stream: UnsafeMutablePointer<uv_stream_t>) -> UnsafeMutablePointer<T> {
+func castFromBaseStream<T: UVStreamRepresentable>(_ stream: UnsafeMutablePointer<uv_stream_t>)
+    -> UnsafeMutablePointer<T>
+{
     func castPointer(_ p: UnsafeMutableRawPointer) -> UnsafeMutablePointer<T> {
         p.assumingMemoryBound(to: T.self)
     }
@@ -12,7 +14,9 @@ func castFromBaseStream<T: UVStreamRepresentable>(_ stream: UnsafeMutablePointer
 }
 
 @inlinable
-func castToBaseStream(_ stream: UnsafeMutablePointer<some UVStreamRepresentable>) -> UnsafeMutablePointer<uv_stream_t> {
+func castToBaseStream(_ stream: UnsafeMutablePointer<some UVStreamRepresentable>)
+    -> UnsafeMutablePointer<uv_stream_t>
+{
     func castPointer(_ p: UnsafeMutableRawPointer) -> UnsafeMutablePointer<uv_stream_t> {
         p.assumingMemoryBound(to: uv_stream_t.self)
     }
@@ -21,7 +25,10 @@ func castToBaseStream(_ stream: UnsafeMutablePointer<some UVStreamRepresentable>
 }
 
 @inlinable
-func setStreamData(on stream: UnsafeMutablePointer<some UVStreamRepresentable>, to data: UnsafeMutablePointer<some AnyObject>) {
+func setStreamData(
+    on stream: UnsafeMutablePointer<some UVStreamRepresentable>,
+    to data: UnsafeMutablePointer<some AnyObject>
+) {
     let stream = castToBaseStream(stream)
 
     stream.pointee.data = UnsafeMutableRawPointer(data)

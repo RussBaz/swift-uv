@@ -65,7 +65,9 @@ final class UVTcpServer {
         return .success(())
     }
 
-    func startReading(_ connectionId: Int, using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
+    func startReading(
+        _ connectionId: Int, using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?
+    ) {
         guard let connection = manager.getConnection(with: connectionId) else { return }
         connection.startReading(using: callback, disconnect: disconnect)
     }

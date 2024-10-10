@@ -3,7 +3,9 @@ import Clibuv
 public protocol UVAddressRepresentable {}
 
 @inlinable
-func castToBaseAddress(_ address: UnsafeMutablePointer<some UVAddressRepresentable>) -> UnsafeMutablePointer<sockaddr> {
+func castToBaseAddress(_ address: UnsafeMutablePointer<some UVAddressRepresentable>)
+    -> UnsafeMutablePointer<sockaddr>
+{
     func castPointer(_ p: UnsafeMutableRawPointer) -> UnsafeMutablePointer<sockaddr> {
         p.assumingMemoryBound(to: sockaddr.self)
     }
@@ -12,7 +14,9 @@ func castToBaseAddress(_ address: UnsafeMutablePointer<some UVAddressRepresentab
 }
 
 @inlinable
-func castFromBaseAddress<T: UVAddressRepresentable>(_ stream: UnsafeMutablePointer<sockaddr>) -> UnsafeMutablePointer<T> {
+func castFromBaseAddress<T: UVAddressRepresentable>(_ stream: UnsafeMutablePointer<sockaddr>)
+    -> UnsafeMutablePointer<T>
+{
     func castPointer(_ p: UnsafeMutableRawPointer) -> UnsafeMutablePointer<T> {
         p.assumingMemoryBound(to: T.self)
     }

@@ -1,0 +1,4 @@
+module Clibuv {
+    header "clibuv.h"
+    export *
+}

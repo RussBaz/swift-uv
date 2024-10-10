@@ -16,7 +16,9 @@ private func closeJobHandle(_ req: UnsafeMutablePointer<uv_handle_t>?) {
     }
 }
 
-private func closeAllOpenHandlers(_ req: UnsafeMutablePointer<uv_handle_t>?, _: UnsafeMutableRawPointer?) {
+private func closeAllOpenHandlers(
+    _ req: UnsafeMutablePointer<uv_handle_t>?, _: UnsafeMutableRawPointer?
+) {
     guard let req else { return }
     guard uv_is_closing(req) == 0 else { return }
     let name = uv_handle_type_name(req.pointee.type).map { String(cString: $0) } ?? "no-name"

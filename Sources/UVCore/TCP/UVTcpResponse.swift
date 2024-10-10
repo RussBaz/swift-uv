@@ -17,9 +17,14 @@ final class UVTcpResponse {
         self.callback = callback
     }
 
-    func write(_ pointer: UnsafeMutablePointer<UVTcpResponse>, to connection: UnsafeMutablePointer<uv_tcp_t>) {
+    func write(
+        _ pointer: UnsafeMutablePointer<UVTcpResponse>,
+        to connection: UnsafeMutablePointer<uv_tcp_t>
+    ) {
         setStreamData(on: &request, to: pointer)
-        let status = uv_write(&request, castToBaseStream(connection), _buffer, 1, onTcpWrite(req:status:))
+        let status = uv_write(
+            &request, castToBaseStream(connection), _buffer, 1, onTcpWrite(req:status:)
+        )
 
         guard status == 0 else {
             finalise()
