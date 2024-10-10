@@ -12,11 +12,12 @@ func onTcpBufferAllocate(
     let pointer = UnsafeMutablePointer<CChar>.allocate(capacity: size)
     buffer!.pointee.base = pointer
     #if os(Windows)
-    buffer!.pointee.len = UInt32(size)
+        buffer!.pointee.len = UInt32(size)
     #else
-    buffer!.pointee.len = size
+        buffer!.pointee.len = size
     #endif
 }
+
 func onTcpRead(
     connection: UnsafeMutablePointer<uv_stream_t>!, nread: Int, buffer: UnsafePointer<uv_buf_t>!
 ) {
@@ -47,6 +48,7 @@ func onTcpRead(
 
     connection.read(buffer: buffer)
 }
+
 func onTcpWrite(req: UnsafeMutablePointer<uv_write_t>!, status: Int32) {
     if status != 0 {
         print("Error while writing: \(status)")

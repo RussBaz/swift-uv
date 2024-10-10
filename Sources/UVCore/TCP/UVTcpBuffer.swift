@@ -42,9 +42,9 @@ public final class UVTcpBuffer: @unchecked Sendable {
         if let _buffer {
             _buffer.withMemoryRebound(to: CChar.self) { ptr in
                 #if os(Windows)
-                uv_buf_t(len: Swift.max(Swift.min(UInt32(ptr.count), UInt32(size)), 0), base: ptr.baseAddress)
+                    uv_buf_t(len: Swift.max(Swift.min(UInt32(ptr.count), UInt32(size)), 0), base: ptr.baseAddress)
                 #else
-                uv_buf_t(base: ptr.baseAddress, len: Swift.max(Swift.min(ptr.count, Int(size)), 0))
+                    uv_buf_t(base: ptr.baseAddress, len: Swift.max(Swift.min(ptr.count, Int(size)), 0))
                 #endif
             }
         } else {
