@@ -1,13 +1,13 @@
 {
-  "originHash" : "1648fc8f7bba0d56e4962950d53ea64e680315bd79c37bfa26c9f6011678c193",
+  "originHash" : "59fb6613b1f84459261e42fec347ed08c14991118bfe9f9560799e44b93c8bd6",
   "pins" : [
     {
       "identity" : "mini-alloc",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RussBaz/mini-alloc",
       "state" : {
-        "revision" : "4cc2a52d36b7e08ca3295c1d111dc1c2c5e72d18",
-        "version" : "1.0.0"
+        "revision" : "fda16b0f7527320942496bc1a49dd4d6de7cd0de",
+        "version" : "1.0.2"
       }
     },
     {

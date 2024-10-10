@@ -1,38 +1,25 @@
 import Clibuv
 
-private func onWrite(req: UnsafeMutablePointer<uv_write_t>?, status: Int32) {
-    guard req != nil else {
-        print("having issues writing")
-        return
-    }
-
-    guard status == 0 else {
-        return
-    }
-
-    let response = req!.pointee.data.load(as: UVTcpResponse.self)
-
-    response.finalise()
-}
-
 final class UVTcpResponse {
     private let id: Int
     private let callback: () -> Void
     private let connection: UVTcpConnection
     private var request = uv_write_t()
-    private let buffer: UVTcpBuffer
+    private var buffer: UVTcpBuffer
+    private let _buffer: UnsafeMutablePointer<uv_buf_t>
     private var running = true
 
     init(id: Int, connection: UVTcpConnection, buffer: UVTcpBuffer, callback: @escaping () -> Void) {
         self.connection = connection
         self.buffer = buffer
+        _buffer = UnsafeMutablePointer(buffer.buffer.pointer)
         self.id = id
         self.callback = callback
     }
 
-    func write(_ pointer: UnsafeMutablePointer<UVTcpResponse>) {
+    func write(_ pointer: UnsafeMutablePointer<UVTcpResponse>, to connection: UnsafeMutablePointer<uv_tcp_t>) {
         setStreamData(on: &request, to: pointer)
-        let status = uv_write(&request, castToBaseStream(&connection.connection), buffer.getBuffer(), 1, onWrite(req:status:))
+        let status = uv_write(&request, castToBaseStream(connection), _buffer, 1, onTcpWrite(req:status:))
 
         guard status == 0 else {
             finalise()
@@ -41,7 +28,7 @@ final class UVTcpResponse {
     }
 
     func finalise() {
+        uv_buf_t.free(_buffer)
         callback()
-        connection.removeReponseBuffer(with: id)
     }
 }

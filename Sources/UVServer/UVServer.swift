@@ -14,8 +14,7 @@ public final actor UVServer {
     }
 
     public func start(using connectionCallback: (@escaping @Sendable (Result<UVTcpConn, UVError>) -> Void) = { _ in }) async -> Result<Int, UVError> {
-        config.onConnection = { status in
-            print("new message")
+        config.onConnect = { status in
             switch status {
             case let .success(success):
                 connectionCallback(.success(UVTcpConn(controller: success)))
@@ -25,12 +24,14 @@ public final actor UVServer {
         }
 
         return await withCheckedContinuation { continuation in
-            config.onStart = { status in
+            config.onServerStart = { status in
                 continuation.resume(returning: status)
             }
+
             guard let config = config.config else {
                 return continuation.resume(returning: .failure(.failedToInit))
             }
+
             thread.startListening(with: config)
         }
     }

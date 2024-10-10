@@ -35,7 +35,7 @@ actor SampleTestActor {
 struct uvTests {
     @Test func executorRuns() async throws {
         let config = UVTcpServerSetup()
-        config.onStart = { status in
+        config.onServerStart = { status in
             switch status {
             case .success:
                 print("Server started")
@@ -44,7 +44,7 @@ struct uvTests {
             }
         }
 
-        config.onConnection = { connection in
+        config.onConnect = { connection in
             switch connection {
             case let .success(success):
                 print("New connection: \(success)")

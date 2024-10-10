@@ -8,9 +8,10 @@ public enum UVIPAddress {
 public final class UVTcpServerSetup {
     public let address: UVIPAddress
     public let port: Int32
-    public var onStart: (@Sendable (Result<Int, UVError>) -> Void)?
-    public var onStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
-    public var onConnection: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
+    public var onServerStart: (@Sendable (Result<Int, UVError>) -> Void)?
+    public var onServerStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
+    public var onConnect: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
+    public var onDisconnect: (@Sendable (UInt) -> Void)?
 
     public init(_ address: UVIPAddress = .ipv4("127.0.0.1"), port: Int32 = 8080) {
         self.address = address
@@ -26,9 +27,10 @@ public struct UVTcpServerConfig {
     public let addr: sockaddr
     public let address: UVIPAddress
     public let port: Int32
-    public let onStart: (@Sendable (Result<Int, UVError>) -> Void)?
-    public let onStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
-    public let onConnection: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
+    public let onServerStart: (@Sendable (Result<Int, UVError>) -> Void)?
+    public let onServerStop: (@Sendable (UInt, UVTcpServerStatus) -> Void)?
+    public let onConnect: (@Sendable (Result<UVTcpConnectionController, UVError>) -> Void)?
+    public let onDisconnect: (@Sendable (UInt) -> Void)?
 }
 
 extension UVTcpServerConfig {
@@ -45,8 +47,9 @@ extension UVTcpServerConfig {
 
         address = setup.address
         port = setup.port
-        onStop = setup.onStop
-        onStart = setup.onStart
-        onConnection = setup.onConnection
+        onServerStop = setup.onServerStop
+        onServerStart = setup.onServerStart
+        onConnect = setup.onConnect
+        onDisconnect = setup.onDisconnect
     }
 }

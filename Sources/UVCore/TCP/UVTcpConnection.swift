@@ -3,47 +3,6 @@ import Collections
 import Foundation
 import MA
 
-private func onBufferAllocate(handle: UnsafeMutablePointer<uv_handle_t>?, size: Int, buffer: UnsafeMutablePointer<uv_buf_t>?) {
-    guard handle != nil, buffer != nil else {
-        print("problem allocating tcp connection buffer")
-        return
-    }
-
-    let connection = handle!.pointee.data.load(as: UVTcpConnection.self)
-
-    let emptyBuffer = connection.allocateBuffer(size: size)
-
-    emptyBuffer.allocate(to: buffer!)
-}
-
-private func onRead(connection: UnsafeMutablePointer<uv_stream_t>?, nread: Int, buffer: UnsafePointer<uv_buf_t>?) {
-    guard connection != nil, buffer != nil else {
-        print("problem reading tcp connection buffer")
-        return
-    }
-
-    let connection = connection!.pointee.data.load(as: UVTcpConnection.self)
-
-    guard nread >= 0 else {
-        // An error occured
-        if nread == -4095 {
-            connection.onDisconnect()
-        }
-
-        connection.close()
-        return
-    }
-
-    guard nread > 0 else {
-        // The stream is empty
-        connection.onDisconnect()
-        connection.close()
-        return
-    }
-
-    connection.read()
-}
-
 enum UVTcpConnectionStatus {
     case waiting
     case opened
@@ -51,13 +10,21 @@ enum UVTcpConnectionStatus {
     case failed
 }
 
+struct ConnectionRef: UVManualMemoryConvertible {
+    let manager: UnsafeMutablePointer<UVTcpManager>
+    let serverId: Int
+    let connectionId: Int
+}
+
 final class UVTcpConnection {
-    var connection: uv_tcp_t
+    let id: Int
+    private let manager: UnsafeMutablePointer<UVTcpManager>
+    private var connection: uv_tcp_t
+    let serverId: Int
     private let server: UVTcpServer
 
     private var allocatedBufferIds = Deque<Int>()
-    private let inBuffers = MAContainer<UVTcpBuffer>()
-    private let outBuffers = MAContainer<UVTcpResponse>()
+    private let responseBuffers = MAContainer<UVTcpResponse>()
 
     private var currentResponseId: UInt = 0
 
@@ -66,15 +33,17 @@ final class UVTcpConnection {
 
     private var opened = true
 
-    init(server: UVTcpServer) {
+    init(id: Int, server: UVTcpServer) {
+        self.id = id
         connection = uv_tcp_t()
         self.server = server
+        serverId = server.id
+        manager = server.managerPointer
+        connection.data = ConnectionRef(manager: server.managerPointer, serverId: serverId, connectionId: id).rawPointer
         uv_tcp_init(server.manager.jobs.loop, &connection)
     }
 
-    func accept(_ pointer: UnsafeMutablePointer<UVTcpConnection>) -> Result<Void, UVError> {
-        setStreamData(on: &connection, to: pointer)
-
+    func accept() -> Result<Void, UVError> {
         let r = uv_accept(castToBaseStream(&server.server), castToBaseStream(&connection))
         guard r == 0 else {
             close()
@@ -84,17 +53,10 @@ final class UVTcpConnection {
         return .success(())
     }
 
-    func allocateBuffer(size: Int) -> UVTcpBuffer {
-        let id = inBuffers.retain(UVTcpBuffer(size: size))!
-        allocatedBufferIds.append(id)
-
-        return inBuffers.find(by: id)!
-    }
-
     func startReading(using callback: ((UVTcpBuffer) -> Void)?, disconnect: (() -> Void)?) {
         self.callback = callback
         disconnectCallback = disconnect
-        let r = uv_read_start(castToBaseStream(&connection), onBufferAllocate(handle:size:buffer:), onRead(connection:nread:buffer:))
+        let r = uv_read_start(castToBaseStream(&connection), onTcpBufferAllocate(handle:size:buffer:), onTcpRead(connection:nread:buffer:))
 
         guard r == 0 else {
             close()
@@ -102,10 +64,7 @@ final class UVTcpConnection {
         }
     }
 
-    func read() {
-        guard let id = allocatedBufferIds.popFirst() else { return }
-        guard let buffer = inBuffers.find(by: id) else { return }
-
+    func read(buffer: UVTcpBuffer) {
         if let callback {
             callback(buffer)
         }
@@ -118,11 +77,14 @@ final class UVTcpConnection {
     }
 
     func write(buffer container: UVTcpBuffer, using callback: @escaping (() -> Void)) {
-        let id = outBuffers.retain {
-            UVTcpResponse(id: $0, connection: self, buffer: container, callback: callback)
+        let id = responseBuffers.retain { id in
+            UVTcpResponse(id: id, connection: self, buffer: container) {
+                self.responseBuffers.release(id)
+                callback()
+            }
         }!
-        outBuffers.update(with: id) { response in
-            response.write(&response)
+        responseBuffers.update(with: id) { response in
+            response.write(&response, to: &connection)
         }
     }
 
@@ -137,11 +99,11 @@ final class UVTcpConnection {
     func close() {
         guard opened else { return }
         opened = false
-        uv_close(castToBaseHandler(&connection), nil)
+        uv_close(castToBaseHandler(&connection), onTcpDisconnect(handle:))
     }
 
     func removeReponseBuffer(with id: Int) {
-        outBuffers.release(id)
+        responseBuffers.release(id)
     }
 
     deinit {

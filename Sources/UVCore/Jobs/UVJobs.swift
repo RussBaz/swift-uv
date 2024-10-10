@@ -96,20 +96,20 @@ final class UVJobs {
                 }
                 timers.submit(task, at: at)
             case let .listenTcp(config):
-                guard let tcp else { continue }
-                tcp.start(config)
+                guard tcp != nil else { continue }
+                UVTcpManager.start(config, on: &tcp!)
             case let .startTcpReading(server, connection, callback, disconnect):
                 guard let tcp else { continue }
                 tcp.startReading(connection, on: server, using: callback, disconnect: disconnect)
-            case let .closeTcpConnection(server, connection):
+            case let .closeTcpConnection(id):
                 guard let tcp else { continue }
-                tcp.closeConnection(connection, on: server)
+                tcp.close(connection: id)
             case let .writeTcp(server, connection, buffer, callback):
                 guard let tcp else { continue }
                 tcp.write(buffer, to: connection, on: server, using: callback)
-            case let .stopListeningTcp(server):
+            case let .stopListeningTcp(id):
                 guard let tcp else { continue }
-                tcp.close(server)
+                tcp.close(server: id)
             }
         }
     }

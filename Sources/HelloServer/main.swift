@@ -3,26 +3,16 @@ import UVServer
 
 let server = UVServer()
 
-let message = """
-HTTP/1.1 200 OK
-Content-Length: 23
-Content-Type: text/html; charset=utf-8
-
-<p> Hello World! </p>
-
-"""
-
-let buffer = UVTcpBuffer(string: message)
+let message = "HTTP/1.1 200 OK\r\nContent-Length: 19\r\nContent-Type: text/html\r\n\r\n<p>Hello World!</p>"
 
 let status = await server.start { status in
     switch status {
     case let .success(success):
         Task {
             for await req in success.requests {
-                let text = req.asString
+                let text = String(bytes: req, encoding: .utf8) ?? ""
                 print("Recieved:\n\(text)")
-                guard let buffer else { break }
-                await success.write(buffer)
+                await success.write(UVTcpBuffer(string: message))
             }
             print("connection closed")
         }
@@ -39,3 +29,4 @@ case let .failure(failure):
 }
 
 try await Task.sleep(until: .now.advanced(by: .seconds(120)))
+print("The server is stopping because this is a sample server only meant to run for a few minutes.")

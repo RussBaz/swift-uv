@@ -1,12 +1,16 @@
 import Clibuv
 import Dispatch
 import Foundation
+import MA
 
 public final class UVExecutionThread: Thread, @unchecked Sendable {
+    private var id = -1
     private var loop: uv_loop_t
     private var jobs: UVJobs
     private var running = NSLock()
     private var _executor: UVExecutor?
+
+    nonisolated(unsafe) static let all = MAContainer<UVExecutionThread>()
 
     override public init() {
         loop = uv_loop_t()
@@ -16,6 +20,10 @@ public final class UVExecutionThread: Thread, @unchecked Sendable {
         jobs.set(tcp: UVTcpManager(jobs: jobs))
         UVJobs.start(&jobs)
         super.init()
+        UVExecutionThread.all.retain {
+            self.id = $0
+            return self
+        }
     }
 
     deinit {
@@ -47,12 +55,13 @@ public final class UVExecutionThread: Thread, @unchecked Sendable {
     override public func main() {
         running.lock()
         defer { running.unlock() }
+
         while true {
             guard !isCancelled else { break }
-            print("starting the loop on thread: \(self)")
             uv_run(&loop, UV_RUN_DEFAULT)
-            print("the loop on thread: \(self) stopped")
         }
+
+        UVExecutionThread.all.release(id)
     }
 
     override public func cancel() {

@@ -1,7 +1,8 @@
+import Collections
 import Foundation
 
 final class UVFIFOQueue<T> {
-    private var items: [T] = []
+    private var items = Deque<T>()
     private let hasItemsWaiter = NSCondition()
 
     func enqueue(_ element: T) {

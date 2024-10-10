@@ -18,7 +18,7 @@ public final class UVTcpConnectionController: @unchecked Sendable {
     }
 
     public func close() {
-        jobs.add(command: .closeTcpConnection(server: serverId, connection: connectionId))
+        jobs.add(command: .closeTcpConnection(connection: connectionId))
     }
 
     public func reset() {}
