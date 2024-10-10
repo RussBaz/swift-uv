@@ -11,7 +11,7 @@ public final class UVTcpBuffer: @unchecked Sendable {
 
     init(size: Int, buf: UnsafePointer<uv_buf_t>) {
         self.size = UInt32(size)
-        _buffer = UnsafeMutableRawBufferPointer(start: buf.pointee.base, count: buf.pointee.len)
+        _buffer = UnsafeMutableRawBufferPointer(start: buf.pointee.base, count: Int(buf.pointee.len))
     }
 
     public init(string: String) {
@@ -41,7 +41,11 @@ public final class UVTcpBuffer: @unchecked Sendable {
     var buffer: uv_buf_t {
         if let _buffer {
             _buffer.withMemoryRebound(to: CChar.self) { ptr in
+                #if os(Windows)
+                uv_buf_t(len: Swift.max(Swift.min(UInt32(ptr.count), UInt32(size)), 0), base: ptr.baseAddress)
+                #else
                 uv_buf_t(base: ptr.baseAddress, len: Swift.max(Swift.min(ptr.count, Int(size)), 0))
+                #endif
             }
         } else {
             uv_buf_t()
