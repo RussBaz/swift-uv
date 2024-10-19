@@ -2,4 +2,4 @@
 
 libuv runner + custom actor executor + sample server. A work in progress.
 
-The project includes a copy of 'libuv' version 1.49.0. (https://github.com/libuv/libuv)
+The project includes a copy of 'libuv' version 1.49.2. (https://github.com/libuv/libuv)
