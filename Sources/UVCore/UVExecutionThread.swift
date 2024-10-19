@@ -3,6 +3,10 @@ import Dispatch
 import Foundation
 import MA
 
+#if os(Linux)
+internal import CoreFoundation
+#endif
+
 public final class UVExecutionThread: Thread, @unchecked Sendable {
     private var id = -1
     private var loop: uv_loop_t
